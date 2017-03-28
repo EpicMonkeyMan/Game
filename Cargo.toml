@@ -1,0 +1,7 @@
+[package]
+name = "Game"
+version = "0.1.0"
+authors = ["Sondre Skole PC <smt1998x@hotmail.com>"]
+
+[dependencies]
+glium = "*"
