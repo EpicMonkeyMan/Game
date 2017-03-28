@@ -19,12 +19,13 @@ fn main() {
     implement_vertex!(Vertex, position);
 
     let vertex1 = Vertex { position: [-0.5, -0.5] };
-    let vertex2 = Vertex { position: [ 0.0,  0.5] };
-    let vertex3 = Vertex { position: [ 0.5, -0.25] };
-    let shape = vec![vertex1, vertex2, vertex3];
+    let vertex2 = Vertex { position: [ 0.5,  -0.5] };
+    let vertex3 = Vertex { position: [ -0.5, 0.5] };
+    let vertex4 = Vertex { position: [ 0.5, 0.5] };
+    let shape = vec![vertex1, vertex2, vertex3, vertex4];
 
-    let vertex_buffer = glium::VertexBuffer::new(&window, &shape).unwrap();   
-    let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+    let vertex_buffer = glium::VertexBuffer::new(&window, &shape).unwrap();
+    let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleStrip);
 
     let mut vshader_src = String::new();
     let mut fshader_src = String::new();
