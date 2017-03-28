@@ -26,23 +26,21 @@ fn main() {
     let vertex_buffer = glium::VertexBuffer::new(&window, &shape).unwrap();   
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-    let vertex_shader_src = r#"
-    #version 140
+    let mut vshader_src = String::new();
+    let mut fshader_src = String::new();
+    unsafe {
+        use std::io::{Read, BufReader};
+        use std::fs::File;
 
-    in vec2 position;
-    void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-    }"#;
+        let vsf = File::open("shaders/sprite.vert").unwrap();
+        let fsf = File::open("shaders/sprite.frag").unwrap();
+        let mut vsr = BufReader::new(vsf);
+        let mut fsr = BufReader::new(fsf);
+        vsr.read_to_end(&mut vshader_src.as_mut_vec()).unwrap();
+        fsr.read_to_end(&mut fshader_src.as_mut_vec()).unwrap();
+    }
 
-    let fragment_shader_src = r#"
-    #version 140
-
-    out vec4 color;
-    void main() {
-        color = vec4(1.0, 0.0, 0.0, 1.0);
-    }"#;
-
-    let program = glium::Program::from_source(&window, vertex_shader_src, fragment_shader_src, None).unwrap();
+    let program = glium::Program::from_source(&window, vshader_src.as_str(), fshader_src.as_str(), None).unwrap();
 
     'gameloop: loop {
         for e in window.poll_events() {
