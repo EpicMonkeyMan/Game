@@ -14,7 +14,7 @@ fn main() {
         .build_glium()
         .unwrap();
 
-    let image = image::load(Cursor::new(&include_bytes!("../textures/david2.png")[..]), image::PNG).unwrap().to_rgba();
+    let image = image::load(Cursor::new(&include_bytes!("../textures/david.png")[..]), image::PNG).unwrap().to_rgba();
     let image_dimensions = image.dimensions();
     let image = glium::texture::RawImage2d::from_raw_rgba_reversed(image.into_raw(), image_dimensions);
     let texture = glium::texture::CompressedSrgbTexture2d::new(&window, image).unwrap();
@@ -23,17 +23,18 @@ fn main() {
         #[derive(Copy, Clone)]
         struct Vertex {
             position: [f32; 2],
-            tex_coords: [f32; 2],
+            color: [f32; 3],
+            tex_coords: [f32; 2]
         }
 
-        implement_vertex!(Vertex, position, tex_coords);
+        implement_vertex!(Vertex, position, color, tex_coords);
 
         glium::VertexBuffer::new(&window, 
             &[
-                Vertex { position: [-0.5, -0.5], tex_coords: [0.0, 0.0] },
-                Vertex { position: [-0.5,  0.5], tex_coords: [0.0, 1.0] },
-                Vertex { position: [ 0.5,  0.5], tex_coords: [1.0, 1.0] },
-                Vertex { position: [ 0.5, -0.5], tex_coords: [1.0, 0.0] }
+                Vertex { position: [-0.5, -0.5], color: [1.0, 0.0, 0.0], tex_coords: [0.0, 0.0] },
+                Vertex { position: [-0.5,  0.5], color: [0.0, 1.0, 0.0], tex_coords: [0.0, 1.0] },
+                Vertex { position: [ 0.5,  0.5], color: [0.0, 0.0, 1.0], tex_coords: [1.0, 1.0] },
+                Vertex { position: [ 0.5, -0.5], color: [1.0, 1.0, 0.0], tex_coords: [1.0, 0.0] }
             ]
         ).unwrap()
     };
