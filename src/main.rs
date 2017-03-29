@@ -3,6 +3,8 @@ extern crate glium;
 extern crate image;
 extern crate cgmath;
 
+mod entity;
+
 fn main() {
     use glium::{DisplayBuild, Surface};
     use std::io::Cursor;
@@ -45,6 +47,8 @@ fn main() {
         ).unwrap()
     };
 
+    let ent = entity::Model::new(entity::Entity{x: 0.0, y: 0.0, width: 50.0, height: 50.0, texture_path: "david.png"});
+
     //SET INDEX BUFFER
     let index_buffer = glium::IndexBuffer::new(&window, glium::index::PrimitiveType::TriangleStrip, &[1u16, 2, 0, 3]).unwrap();
 
@@ -72,7 +76,7 @@ fn main() {
     let mut down = false;
     let mut x: f32 = 0.0;
     let mut y: f32 = 0.0;
-    
+
     let mut deg: f32 = 0.0;
     'gameloop: loop {
         deg+=1.0;
