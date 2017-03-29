@@ -17,8 +17,6 @@ fn main() {
         //.with_fullscreen(glium::glutin::get_primary_monitor())
         .build_glium()
         .unwrap();
-    
-    let (window_width, window_height) = window.get_max_viewport_dimensions();
 
     //LOAD OPENGL TEXTURE
     let image = image::load(Cursor::new(&include_bytes!("../textures/david.png")[..]), image::PNG).unwrap().to_rgba();
@@ -68,19 +66,37 @@ fn main() {
     //SET PROGRAM
     let program = glium::Program::from_source(&window, vshader_src.as_str(), fshader_src.as_str(), None).unwrap();
 
-    let mut deg = 0.0f32;
+    let mut right = false;
+    let mut left = false;
+    let mut up = false;
+    let mut down = false;
+    let mut x: f32 = 0.0;
+    let mut y: f32 = 0.0;
+    
+    let mut deg: f32 = 0.0;
     'gameloop: loop {
         deg+=1.0;
+
+        //SET WIDTH / HEIGHT
+        let (window_width, window_height) = window.get_framebuffer_dimensions();
+
         //MODEL MATRIX
-        let translate = Matrix4::from_translation(vec3(0.0, 0.0, -1.0));
+        if left {x-=10.0;}
+        if right {x+=10.0;}
+        if up {y-=10.0;}
+        if down {y+=10.0;}
+        let translate = Matrix4::from_translation(vec3(50.0+x, 50.0+y, 0.0));
         let rotate = Matrix4::from_angle_z(Deg(deg));
-        let model_matrix: [[f32; 4]; 4] = (translate * rotate).into();
+        let scale = Matrix4::from_scale(300.0);
+        let model_matrix: [[f32; 4]; 4] = (translate * rotate * scale).into();
+        println!("{}", x);
 
         //VIEW MATRIX
-        let view_matrix: [[f32; 4]; 4] = Matrix4::from_angle_y(Deg(deg)).into();
+        let view_matrix: [[f32; 4]; 4] = Matrix4::from_translation(vec3(0.0, 0.0, 0.0)).into();
 
         //PROJECTION MATRIX
-        let projection_matrix: [[f32; 4]; 4] = cgmath::perspective(Deg(140f32), (window_width/window_height) as f32, 0.1f32, 1000f32).into();
+        //let projection_matrix: [[f32; 4]; 4] = cgmath::perspective(Deg(140f32), (window_width/window_height) as f32, 0.1f32, 100f32).into();
+        let projection_matrix: [[f32; 4]; 4] = cgmath::ortho(0.0f32, window_width as f32, window_height as f32, 0.0f32, -1.0f32, 1.0f32).into();
 
         //SET UNIFORMS
         let uniforms = uniform! {
@@ -92,7 +108,7 @@ fn main() {
 
         //DRAW
         let mut target = window.draw();
-        target.clear_color(deg/10000f32, deg/10000f32, deg/10000f32, 1.0); 
+        target.clear_color(0.2, 0.2, 0.2, 1.0); 
         target.draw(&vertex_buffer, &index_buffer, &program, &uniforms, &Default::default()).unwrap();
         target.finish().unwrap();
 
@@ -102,6 +118,14 @@ fn main() {
 
             match e {
                 Event::Closed => break 'gameloop,
+                Event::KeyboardInput(glium::glutin::ElementState::Pressed, _, Some(glium::glutin::VirtualKeyCode::Left)) => left = true,
+                Event::KeyboardInput(glium::glutin::ElementState::Pressed, _, Some(glium::glutin::VirtualKeyCode::Right)) => right = true,
+                Event::KeyboardInput(glium::glutin::ElementState::Pressed, _, Some(glium::glutin::VirtualKeyCode::Up)) => up = true,
+                Event::KeyboardInput(glium::glutin::ElementState::Pressed, _, Some(glium::glutin::VirtualKeyCode::Down)) => down = true,
+                Event::KeyboardInput(glium::glutin::ElementState::Released, _, Some(glium::glutin::VirtualKeyCode::Left)) => left = false,
+                Event::KeyboardInput(glium::glutin::ElementState::Released, _, Some(glium::glutin::VirtualKeyCode::Right)) => right = false,
+                Event::KeyboardInput(glium::glutin::ElementState::Released, _, Some(glium::glutin::VirtualKeyCode::Up)) => up = false,
+                Event::KeyboardInput(glium::glutin::ElementState::Released, _, Some(glium::glutin::VirtualKeyCode::Down)) => down = false,
                 _ => (),
             }
         }
