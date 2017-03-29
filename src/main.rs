@@ -1,24 +1,30 @@
 #[macro_use]
 extern crate glium;
 extern crate image;
+extern crate cgmath;
 
 fn main() {
     use glium::{DisplayBuild, Surface};
     use std::io::Cursor;
+    use cgmath::{Deg, vec3, Matrix4};
 
+    //CREATE WINDOW
     let window = glium::glutin::WindowBuilder::new()
         .with_vsync()
+        .with_dimensions(800, 600)
         .with_multisampling(8u16)
         .with_title("David er en pen person")
-        .with_fullscreen(glium::glutin::get_primary_monitor())
+        //.with_fullscreen(glium::glutin::get_primary_monitor())
         .build_glium()
         .unwrap();
-
+    
+    //LOAD OPENGL TEXTURE
     let image = image::load(Cursor::new(&include_bytes!("../textures/david.png")[..]), image::PNG).unwrap().to_rgba();
     let image_dimensions = image.dimensions();
     let image = glium::texture::RawImage2d::from_raw_rgba_reversed(image.into_raw(), image_dimensions);
     let texture = glium::texture::CompressedSrgbTexture2d::new(&window, image).unwrap();
 
+    //SET VERTEX BUFFER
     let vertex_buffer = {
         #[derive(Copy, Clone)]
         struct Vertex {
@@ -39,8 +45,10 @@ fn main() {
         ).unwrap()
     };
 
-    let index_buffer = glium::IndexBuffer::new(&window, glium::index::PrimitiveType::TriangleStrip, &[1 as u16, 2, 0, 3]).unwrap();
+    //SET INDEX BUFFER
+    let index_buffer = glium::IndexBuffer::new(&window, glium::index::PrimitiveType::TriangleStrip, &[1u16, 2, 0, 3]).unwrap();
 
+    //LOAD SHADERS
     let mut vshader_src = String::new();
     let mut fshader_src = String::new();
     unsafe {
@@ -55,28 +63,27 @@ fn main() {
         fsr.read_to_end(&mut fshader_src.as_mut_vec()).unwrap();
     }
 
+    //SET PROGRAM
     let program = glium::Program::from_source(&window, vshader_src.as_str(), fshader_src.as_str(), None).unwrap();
 
-    let model_matrix = [
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
-        [0.0, 0.0, 0.0, 1.0f32]
-    ];
-    let view_matrix = [
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
-        [0.0, 0.0, 0.0, 1.0f32]
-    ];
-    let projection_matrix = [
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
-        [0.0, 0.0, 0.0, 1.0f32]
-    ];
-
+    let mut deg = 0.0f32;
     'gameloop: loop {
+        deg+=1.0;
+        //MODEL MATRIX
+        let translate = Matrix4::from_translation(vec3(0.0, 0.0, -1.0));
+        let rotate = Matrix4::from_axis_angle(vec3(1.0, 0.0, 0.0), Deg(deg));
+        let transformed = translate * rotate;
+        let model_matrix: [[f32; 4]; 4] = transformed.into();
+
+        //VIEW MATRIX
+        let rotate = Matrix4::from_axis_angle(vec3(0.0, 1.0, 0.0), Deg(deg));
+        let transformed = rotate;
+        let view_matrix: [[f32; 4]; 4] = transformed.into();
+
+        //PROJECTION MATRIX
+        let projection_matrix: [[f32; 4]; 4] = cgmath::perspective(Deg(140f32), 800f32/600f32, 0.1f32, 1000f32).into();
+
+        //SET UNIFORMS
         let uniforms = uniform! {
             model: model_matrix,
             view: view_matrix,
@@ -84,11 +91,13 @@ fn main() {
             tex: &texture
         };
 
+        //DRAW
         let mut target = window.draw();
         target.clear_color(0.2, 0.2, 0.2, 1.0); 
         target.draw(&vertex_buffer, &index_buffer, &program, &uniforms, &Default::default()).unwrap();
         target.finish().unwrap();
 
+        //EVENTS
         for e in window.poll_events() {
             use glium::glutin::Event;
 
