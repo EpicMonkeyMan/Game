@@ -1,5 +1,5 @@
 extern crate cgmath;
-
+/*
 pub struct Entity {
     x: f32,
     y: f32,
@@ -13,7 +13,8 @@ pub trait Model {
 }
 
 impl Model for Entity {
-    fn new(&self) {
+    fn new(&mut self) {
         self.x+=1.0;
     }
 }
+*/

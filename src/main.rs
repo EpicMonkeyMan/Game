@@ -9,6 +9,7 @@ fn main() {
     use glium::{DisplayBuild, Surface};
     use std::io::Cursor;
     use cgmath::{Deg, vec3, Matrix4};
+    use glium::glutin::VirtualKeyCode;
 
     //CREATE WINDOW
     let window = glium::glutin::WindowBuilder::new()
@@ -47,7 +48,7 @@ fn main() {
         ).unwrap()
     };
 
-    let ent = entity::Model::new(entity::Entity{x: 0.0, y: 0.0, width: 50.0, height: 50.0, texture_path: "david.png"});
+    //let ent = entity::Model::new(entity::Entity{x: 0.0, y: 0.0, width: 50.0, height: 50.0, texture_path: "david.png"});
 
     //SET INDEX BUFFER
     let index_buffer = glium::IndexBuffer::new(&window, glium::index::PrimitiveType::TriangleStrip, &[1u16, 2, 0, 3]).unwrap();
@@ -70,10 +71,7 @@ fn main() {
     //SET PROGRAM
     let program = glium::Program::from_source(&window, vshader_src.as_str(), fshader_src.as_str(), None).unwrap();
 
-    let mut right = false;
-    let mut left = false;
-    let mut up = false;
-    let mut down = false;
+    let mut key_states = std::collections::HashMap::new();
     let mut x: f32 = 0.0;
     let mut y: f32 = 0.0;
 
@@ -85,10 +83,10 @@ fn main() {
         let (window_width, window_height) = window.get_framebuffer_dimensions();
 
         //MODEL MATRIX
-        if left {x-=10.0;}
-        if right {x+=10.0;}
-        if up {y-=10.0;}
-        if down {y+=10.0;}
+        if key_states.get(&VirtualKeyCode::Left) == Some(&true) {x-=10.0;}
+        if key_states.get(&VirtualKeyCode::Right) == Some(&true) {x+=10.0;}
+        if key_states.get(&VirtualKeyCode::Up) == Some(&true) {y-=10.0;}
+        if key_states.get(&VirtualKeyCode::Down) == Some(&true) {y+=10.0;}
         let translate = Matrix4::from_translation(vec3(50.0+x, 50.0+y, 0.0));
         let rotate = Matrix4::from_angle_z(Deg(deg));
         let scale = Matrix4::from_scale(300.0);
@@ -116,20 +114,21 @@ fn main() {
         target.draw(&vertex_buffer, &index_buffer, &program, &uniforms, &Default::default()).unwrap();
         target.finish().unwrap();
 
+        //QUIT
+        if key_states.get(&VirtualKeyCode::Escape) == Some(&true) { break 'gameloop; }
+
         //EVENTS
         for e in window.poll_events() {
-            use glium::glutin::Event;
+            use glium::glutin::{Event, ElementState};
 
             match e {
                 Event::Closed => break 'gameloop,
-                Event::KeyboardInput(glium::glutin::ElementState::Pressed, _, Some(glium::glutin::VirtualKeyCode::Left)) => left = true,
-                Event::KeyboardInput(glium::glutin::ElementState::Pressed, _, Some(glium::glutin::VirtualKeyCode::Right)) => right = true,
-                Event::KeyboardInput(glium::glutin::ElementState::Pressed, _, Some(glium::glutin::VirtualKeyCode::Up)) => up = true,
-                Event::KeyboardInput(glium::glutin::ElementState::Pressed, _, Some(glium::glutin::VirtualKeyCode::Down)) => down = true,
-                Event::KeyboardInput(glium::glutin::ElementState::Released, _, Some(glium::glutin::VirtualKeyCode::Left)) => left = false,
-                Event::KeyboardInput(glium::glutin::ElementState::Released, _, Some(glium::glutin::VirtualKeyCode::Right)) => right = false,
-                Event::KeyboardInput(glium::glutin::ElementState::Released, _, Some(glium::glutin::VirtualKeyCode::Up)) => up = false,
-                Event::KeyboardInput(glium::glutin::ElementState::Released, _, Some(glium::glutin::VirtualKeyCode::Down)) => down = false,
+                Event::KeyboardInput(ElementState::Pressed, _, Some(key)) => {
+                    key_states.insert(key, true);
+                },
+                Event::KeyboardInput(ElementState::Released, _, Some(key)) => {
+                    key_states.insert(key, false);
+                },
                 _ => (),
             }
         }
