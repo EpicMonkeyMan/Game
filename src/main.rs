@@ -18,6 +18,8 @@ fn main() {
         .build_glium()
         .unwrap();
     
+    let (window_width, window_height) = window.get_max_viewport_dimensions();
+
     //LOAD OPENGL TEXTURE
     let image = image::load(Cursor::new(&include_bytes!("../textures/david.png")[..]), image::PNG).unwrap().to_rgba();
     let image_dimensions = image.dimensions();
@@ -71,17 +73,14 @@ fn main() {
         deg+=1.0;
         //MODEL MATRIX
         let translate = Matrix4::from_translation(vec3(0.0, 0.0, -1.0));
-        let rotate = Matrix4::from_axis_angle(vec3(1.0, 0.0, 0.0), Deg(deg));
-        let transformed = translate * rotate;
-        let model_matrix: [[f32; 4]; 4] = transformed.into();
+        let rotate = Matrix4::from_angle_z(Deg(deg));
+        let model_matrix: [[f32; 4]; 4] = (translate * rotate).into();
 
         //VIEW MATRIX
-        let rotate = Matrix4::from_axis_angle(vec3(0.0, 1.0, 0.0), Deg(deg));
-        let transformed = rotate;
-        let view_matrix: [[f32; 4]; 4] = transformed.into();
+        let view_matrix: [[f32; 4]; 4] = Matrix4::from_angle_y(Deg(deg)).into();
 
         //PROJECTION MATRIX
-        let projection_matrix: [[f32; 4]; 4] = cgmath::perspective(Deg(140f32), 800f32/600f32, 0.1f32, 1000f32).into();
+        let projection_matrix: [[f32; 4]; 4] = cgmath::perspective(Deg(140f32), (window_width/window_height) as f32, 0.1f32, 1000f32).into();
 
         //SET UNIFORMS
         let uniforms = uniform! {
@@ -93,7 +92,7 @@ fn main() {
 
         //DRAW
         let mut target = window.draw();
-        target.clear_color(0.2, 0.2, 0.2, 1.0); 
+        target.clear_color(deg/10000f32, deg/10000f32, deg/10000f32, 1.0); 
         target.draw(&vertex_buffer, &index_buffer, &program, &uniforms, &Default::default()).unwrap();
         target.finish().unwrap();
 
