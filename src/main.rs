@@ -5,12 +5,31 @@ extern crate cgmath;
 
 mod entity;
 
-fn main() {
-    use glium::{DisplayBuild, Surface};
-    use std::io::Cursor;
-    use cgmath::{Deg, vec3, Matrix4};
-    use glium::glutin::VirtualKeyCode;
+use glium::{DisplayBuild, Surface};
+use std::io::Cursor;
+use cgmath::{Deg, vec3, Matrix4};
+use glium::glutin::VirtualKeyCode;
 
+fn create_program(window: &glium::backend::glutin_backend::GlutinFacade) -> glium::Program {
+    //LOAD SHADERS
+    let mut vshader_src = String::new();
+    let mut fshader_src = String::new();
+    unsafe {
+        use std::io::{Read, BufReader};
+        use std::fs::File;
+
+        let vsf = File::open("shaders/sprite.vert").unwrap();
+        let fsf = File::open("shaders/sprite.frag").unwrap();
+        let mut vsr = BufReader::new(vsf);
+        let mut fsr = BufReader::new(fsf);
+        vsr.read_to_end(&mut vshader_src.as_mut_vec()).unwrap();
+        fsr.read_to_end(&mut fshader_src.as_mut_vec()).unwrap();
+    }
+
+    glium::Program::from_source(window, vshader_src.as_str(), fshader_src.as_str(), None).unwrap()
+}
+
+fn main() {
     //CREATE WINDOW
     let window = glium::glutin::WindowBuilder::new()
         .with_vsync()
@@ -53,23 +72,8 @@ fn main() {
     //SET INDEX BUFFER
     let index_buffer = glium::IndexBuffer::new(&window, glium::index::PrimitiveType::TriangleStrip, &[1u16, 2, 0, 3]).unwrap();
 
-    //LOAD SHADERS
-    let mut vshader_src = String::new();
-    let mut fshader_src = String::new();
-    unsafe {
-        use std::io::{Read, BufReader};
-        use std::fs::File;
-
-        let vsf = File::open("shaders/sprite.vert").unwrap();
-        let fsf = File::open("shaders/sprite.frag").unwrap();
-        let mut vsr = BufReader::new(vsf);
-        let mut fsr = BufReader::new(fsf);
-        vsr.read_to_end(&mut vshader_src.as_mut_vec()).unwrap();
-        fsr.read_to_end(&mut fshader_src.as_mut_vec()).unwrap();
-    }
-
     //SET PROGRAM
-    let program = glium::Program::from_source(&window, vshader_src.as_str(), fshader_src.as_str(), None).unwrap();
+    let mut program = create_program(&window);
 
     let mut key_states = std::collections::HashMap::new();
     let mut x: f32 = 0.0;
@@ -91,7 +95,6 @@ fn main() {
         let rotate = Matrix4::from_angle_z(Deg(deg));
         let scale = Matrix4::from_scale(300.0);
         let model_matrix: [[f32; 4]; 4] = (translate * rotate * scale).into();
-        println!("{}", x);
 
         //VIEW MATRIX
         let view_matrix: [[f32; 4]; 4] = Matrix4::from_translation(vec3(0.0, 0.0, 0.0)).into();
@@ -116,6 +119,9 @@ fn main() {
 
         //QUIT
         if key_states.get(&VirtualKeyCode::Escape) == Some(&true) { break 'gameloop; }
+
+        //REBUILD PROGRAM
+        if key_states.get(&VirtualKeyCode::R) == Some(&true) { program = create_program(&window); }
 
         //EVENTS
         for e in window.poll_events() {
