@@ -42,7 +42,7 @@ pub fn load_opengl_texture(window: &glium::backend::glutin_backend::GlutinFacade
     //LOAD OPENGL TEXTURE
     let image = image::load(Cursor::new(path_src.as_bytes()), image::PNG).unwrap().to_rgba();
     let image_dimensions = image.dimensions();
-    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(image.into_raw(), image_dimensions);
+    let image = glium::texture::RawImage2d::from_raw_rgba(image.into_raw(), image_dimensions);
     glium::texture::CompressedSrgbTexture2d::new(window, image).unwrap()
 }
 
