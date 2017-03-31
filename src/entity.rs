@@ -3,7 +3,6 @@ extern crate cgmath;
 
 use opengl;
 
-#[derive(Copy)]
 pub struct Entity {
     x: f32,
     y: f32, 

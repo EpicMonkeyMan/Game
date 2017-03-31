@@ -31,6 +31,8 @@ fn main() {
     let mut david = entity::Entity::new(&window, 0.0, 0.0, 300.0, 300.0,
                 "shaders/sprite.vert", "shaders/sprite.frag", "textures/david.png");
 
+    let mut entities = vec![david, background];
+
     //SET TEMP
     let mut key_states = std::collections::HashMap::new();
     let (mut x, mut y) = (0.0, 0.0);
@@ -46,7 +48,7 @@ fn main() {
         if key_states.get(&VirtualKeyCode::Up) == Some(&true) {y-=10.0;}
         if key_states.get(&VirtualKeyCode::Down) == Some(&true) {y+=10.0;}
 
-        david.translate(1.0, 0.0);
+        entities[0].translate(1.0, 0.0);
 
         //VIEW MATRIX
         let view_matrix: [[f32; 4]; 4] = Matrix4::from_translation(vec3(-x, -y, 0.0)).into();
@@ -59,7 +61,6 @@ fn main() {
         let mut target = window.draw();
         target.clear_color_and_depth((0.2, 0.2, 0.2, 1.0), 1.0);
         
-        let entities = vec![david, background];
         for e in entities.iter() {
             e.draw(&mut target, view_matrix, projection_matrix);
         }
