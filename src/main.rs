@@ -16,7 +16,6 @@ fn main() {
         .with_vsync()
         .with_dimensions(800, 600)
         .with_multisampling(8u16)
-        .with_depth_buffer(24)
         .with_title("David er en pen person")
         //.with_fullscreen(glium::glutin::get_primary_monitor())
         .build_glium()
@@ -28,27 +27,34 @@ fn main() {
     //ENTITY
     let background = entity::Entity::new(&window, 0.0, 0.0, window_width as f32, window_height as f32,
                 "shaders/sprite.vert", "shaders/sprite.frag", "textures/background.png");
-    let mut david = entity::Entity::new(&window, 0.0, 0.0, 300.0, 300.0,
+    let david = entity::Entity::new(&window, 0.0, 0.0, 150.0, 150.0,
                 "shaders/sprite.vert", "shaders/sprite.frag", "textures/david.png");
-
-    let mut entities = vec![david, background];
+  
+    let mut entities = vec![background, david];
 
     //SET TEMP
     let mut key_states = std::collections::HashMap::new();
     let (mut x, mut y) = (0.0, 0.0);
-    let mut deg = 0.0;
 
     'gameloop: loop {
         //UPDATE WIDTH AND HEIGHT
         let (window_width, window_height) = window.get_framebuffer_dimensions();
+        entities[0].set_nonuniform_scale(window_width as f32, window_height as f32);
+        entities[0].set_translation(0.0, 0.0);
 
         //KEY
         if key_states.get(&VirtualKeyCode::Left) == Some(&true) {x-=10.0;}
         if key_states.get(&VirtualKeyCode::Right) == Some(&true) {x+=10.0;}
         if key_states.get(&VirtualKeyCode::Up) == Some(&true) {y-=10.0;}
         if key_states.get(&VirtualKeyCode::Down) == Some(&true) {y+=10.0;}
+        if key_states.get(&VirtualKeyCode::D) == Some(&true) {entities[1].translate(5.0, 0.0);}
+        if key_states.get(&VirtualKeyCode::A) == Some(&true) {entities[1].translate(-5.0, 0.0);}
+        if key_states.get(&VirtualKeyCode::W) == Some(&true) {entities[1].translate(0.0, -5.0);}
+        if key_states.get(&VirtualKeyCode::S) == Some(&true) {entities[1].translate(0.0, 5.0);}
+        if key_states.get(&VirtualKeyCode::E) == Some(&true) {entities[1].rotate(10.0);}
+        if key_states.get(&VirtualKeyCode::Q) == Some(&true) {entities[1].rotate(-10.0);}
 
-        entities[0].translate(1.0, 0.0);
+        println!("SCRN_W: {} SCRN_H: {} X: {} Y: {} Width {} Height: {} Rotation: {}", window_width, window_height, entities[1].x, entities[1].y, entities[1].width, entities[1].height, entities[1].rotation);
 
         //VIEW MATRIX
         let view_matrix: [[f32; 4]; 4] = Matrix4::from_translation(vec3(-x, -y, 0.0)).into();
@@ -59,7 +65,7 @@ fn main() {
 
         //DRAW
         let mut target = window.draw();
-        target.clear_color_and_depth((0.2, 0.2, 0.2, 1.0), 1.0);
+        target.clear_color(0.2, 0.2, 0.2, 1.0);
         
         for e in entities.iter() {
             e.draw(&mut target, view_matrix, projection_matrix);
