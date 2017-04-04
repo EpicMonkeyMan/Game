@@ -9,38 +9,26 @@ pub struct Vertex {
     tex_coords: [f32; 2],
 }
 
+pub fn load_file(src: &'static str) -> String {
+    use std::io::{Read, BufReader};
+    use std::fs::File;
+
+    let mut src_buffer = String::new();
+    let src_file = File::open(src).unwrap();
+    let mut src_bufreader = BufReader::new(src_file);
+    unsafe {src_bufreader.read_to_end(src_buffer.as_mut_vec()).unwrap();}
+
+    src_buffer
+}
+
+#[inline]
 pub fn create_program(window: &glium::backend::glutin_backend::GlutinFacade, shader_vert: &'static str, shader_frag: &'static str) -> glium::Program {
-    //LOAD SHADERS
-    let mut vshader_src = String::new();
-    let mut fshader_src = String::new();
-    unsafe {
-        use std::io::{Read, BufReader};
-        use std::fs::File;
-
-        let vsf = File::open(shader_vert).unwrap();
-        let fsf = File::open(shader_frag).unwrap();
-        let mut vsr = BufReader::new(vsf);
-        let mut fsr = BufReader::new(fsf);
-        vsr.read_to_end(&mut vshader_src.as_mut_vec()).unwrap();
-        fsr.read_to_end(&mut fshader_src.as_mut_vec()).unwrap();
-    }
-
-    glium::Program::from_source(window, vshader_src.as_str(), fshader_src.as_str(), None).unwrap()
+    glium::Program::from_source(window, load_file(shader_vert).as_str(), load_file(shader_frag).as_str(), None).unwrap()
 }
 
 pub fn load_opengl_texture(window: &glium::backend::glutin_backend::GlutinFacade, path_str: &'static str) -> glium::texture::CompressedSrgbTexture2d {
-    //LOAD FILE
-    let mut path_src = String::new();
-    unsafe {
-        use std::io::{Read, BufReader};
-        use std::fs::File;
-
-        let path_f = File::open(path_str).unwrap();
-        let mut path_r = BufReader::new(path_f);
-        path_r.read_to_end(&mut path_src.as_mut_vec()).unwrap();
-    }
     //LOAD OPENGL TEXTURE
-    let image = image::load(Cursor::new(path_src.as_bytes()), image::PNG).unwrap().to_rgba();
+    let image = image::load(Cursor::new(load_file(path_str).as_bytes()), image::PNG).unwrap().to_rgba();
     let image_dimensions = image.dimensions();
     let image = glium::texture::RawImage2d::from_raw_rgba(image.into_raw(), image_dimensions);
     glium::texture::CompressedSrgbTexture2d::new(window, image).unwrap()
