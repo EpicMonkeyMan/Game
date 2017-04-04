@@ -8,4 +8,5 @@ uniform sampler2D tex;
 
 void main() {
     f_color = texture(tex, v_tex_coords);
+    if (f_color.a == 0.0) discard;
 }

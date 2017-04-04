@@ -1,6 +1,6 @@
 extern crate cgmath;
 
-use cgmath::{Matrix4, Deg, vec3};
+use cgmath::{Matrix4, Deg, vec3, Point3, Vector3};
 
 pub struct Matrix {
     translate: Matrix4<f32>,
@@ -11,7 +11,7 @@ pub struct Matrix {
     pub z: f32,
     pub width: f32,
     pub height: f32,
-    rotation: f32
+    pub rotation: f32
 }
 
 #[allow(dead_code)]
@@ -51,7 +51,7 @@ impl Matrix {
         self.y = y;
         self.z = z;
 
-        self.translate = Matrix4::from_translation(vec3(self.width/2.0+x, self.height/2.0+y, z));
+        self.translate = Matrix4::from_translation(vec3(x, y, z));
     }
     
     pub fn rotate(&mut self, deg: f32) {
@@ -89,6 +89,6 @@ impl Matrix {
         self.width = width;
         self.height = height;
 
-        self.scale = Matrix4::from_nonuniform_scale(width, height, 0.0);
+        self.scale = Matrix4::from_nonuniform_scale(width, height, 1.0);
     }
 }
