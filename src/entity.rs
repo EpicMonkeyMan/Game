@@ -12,8 +12,6 @@ pub struct Entity {
     program: glium::Program
 }
 
-use cgmath::{Matrix4, vec3, Deg};
-
 #[allow(dead_code)]
 impl Entity {
     pub fn new(window: &glium::backend::glutin_backend::GlutinFacade, x: f32, y: f32, z:f32, width: f32, height: f32, rotation: f32, shader_vert: &'static str, shader_frag: &'static str, texture_path: &'static str) -> Entity {

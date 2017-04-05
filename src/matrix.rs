@@ -1,6 +1,6 @@
 extern crate cgmath;
 
-use cgmath::{Matrix4, Deg, vec3, Point3, Vector3};
+use cgmath::{Matrix4, Deg, vec3};
 
 pub struct Matrix {
     translate: Matrix4<f32>,

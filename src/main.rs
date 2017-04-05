@@ -4,7 +4,6 @@ extern crate image;
 extern crate cgmath;
 
 use glium::{DisplayBuild, Surface};
-use cgmath::{vec3, Matrix4};
 use glium::glutin::VirtualKeyCode;
 
 mod opengl;
@@ -23,9 +22,12 @@ fn main() {
         //.with_fullscreen(glium::glutin::get_primary_monitor())
         .build_glium()
         .unwrap();
-
+    
+    /*
+    //NETWORKING
     let mut network = networking::Network::new();
     network.server();
+    */
     
     //SET WIDTH AND HEIGHT
     let (window_width, window_height) = window.get_framebuffer_dimensions();
@@ -59,6 +61,18 @@ fn main() {
         if key_states.get(&VirtualKeyCode::Up) == Some(&true) {view_matrix.translate(0.0, 5.0, 0.0);}
         if key_states.get(&VirtualKeyCode::Down) == Some(&true) {view_matrix.translate(0.0, -5.0, 0.0);}
 
+        
+        if view_matrix.x + entities[1].model_matrix.x < window_width as f32 /3.0 {
+            view_matrix.translate(5.0, 0.0, 0.0);
+        } else if view_matrix.x + entities[1].model_matrix.x > window_width as f32 - window_width as f32 /3.0 {
+            view_matrix.translate(-5.0, 0.0, 0.0);
+        }
+        if view_matrix.y + entities[1].model_matrix.y < window_height as f32 /3.0 {
+            view_matrix.translate(0.0, 5.0, 0.0);
+        } else if view_matrix.y + entities[1].model_matrix.y > window_height as f32 - window_height as f32 /3.0 {
+            view_matrix.translate(0.0, -5.0, 0.0);
+        }
+
         if key_states.get(&VirtualKeyCode::D) == Some(&true) {entities[1].model_matrix.translate(5.0, 0.0, 0.0);}
         if key_states.get(&VirtualKeyCode::A) == Some(&true) {entities[1].model_matrix.translate(-5.0, 0.0, 0.0);}
         if key_states.get(&VirtualKeyCode::W) == Some(&true) {entities[1].model_matrix.translate(0.0, -5.0, 0.0);}
@@ -67,23 +81,23 @@ fn main() {
         if key_states.get(&VirtualKeyCode::Q) == Some(&true) {entities[1].model_matrix.rotate(-10.0);}
         if key_states.get(&VirtualKeyCode::T) == Some(&true) {entities[1].model_matrix.translate(0.0, 0.0, 1.0);}
         if key_states.get(&VirtualKeyCode::Y) == Some(&true) {entities[1].model_matrix.translate(0.0, 0.0, -1.0);}
-
+        
+        /*
         {
             let xlock = network.x_ratio.lock().unwrap();
             let ylock = network.y_ratio.lock().unwrap();
 
             entities[2].model_matrix.translate(*xlock, *ylock, 0.0);
         }
+        */
 
-        /*
         println!("SCRN_W: {} SCRN_H: {} X: {} Y: {} Z: {} Width {} Height: {} Rotation: {}",
             window_width, window_height, entities[1].model_matrix.x, entities[1].model_matrix.y, entities[1].model_matrix.z,
-            entities[1].model_matrix.width, entities[1].model_matrix.height, entities[1].model_matrix.rotation);
-        */
+            entities[1].model_matrix.width, entities[1].model_matrix.height, entities[1].model_matrix.rotation);        
 
         //PROJECTION MATRIX
         //let projection_matrix: [[f32; 4]; 4] = cgmath::perspective(cgmath::Deg(90f32), (window_width/window_height) as f32, 0.1f32, 1000f32).into();
-        let projection_matrix: [[f32; 4]; 4] = cgmath::ortho(0.0f32, window_width as f32, window_height as f32, 0.0f32, -100.0f32, 100.0f32).into();
+        let projection_matrix: [[f32; 4]; 4] = cgmath::ortho(0.0f32, window_width as f32, window_height as f32, 0.0f32, -100.0f32, 1.0f32).into();
 
         //DRAW
         let mut target = window.draw();
