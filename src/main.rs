@@ -23,6 +23,9 @@ fn main() {
         //.with_fullscreen(glium::glutin::get_primary_monitor())
         .build_glium()
         .unwrap();
+
+    let mut network = networking::Network::new();
+    network.server();
     
     //SET WIDTH AND HEIGHT
     let (window_width, window_height) = window.get_framebuffer_dimensions();
@@ -64,6 +67,13 @@ fn main() {
         if key_states.get(&VirtualKeyCode::Q) == Some(&true) {entities[1].model_matrix.rotate(-10.0);}
         if key_states.get(&VirtualKeyCode::T) == Some(&true) {entities[1].model_matrix.translate(0.0, 0.0, 1.0);}
         if key_states.get(&VirtualKeyCode::Y) == Some(&true) {entities[1].model_matrix.translate(0.0, 0.0, -1.0);}
+
+        {
+            let xlock = network.x_ratio.lock().unwrap();
+            let ylock = network.y_ratio.lock().unwrap();
+
+            entities[2].model_matrix.translate(*xlock, *ylock, 0.0);
+        }
 
         /*
         println!("SCRN_W: {} SCRN_H: {} X: {} Y: {} Z: {} Width {} Height: {} Rotation: {}",
